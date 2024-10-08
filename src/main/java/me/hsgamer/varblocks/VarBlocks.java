@@ -1,17 +1,6 @@
 package me.hsgamer.varblocks;
 
-import org.bukkit.plugin.java.JavaPlugin;
+import io.github.projectunified.minelib.plugin.base.BasePlugin;
 
-public final class VarBlocks extends JavaPlugin {
-
-    @Override
-    public void onEnable() {
-        // Plugin startup logic
-
-    }
-
-    @Override
-    public void onDisable() {
-        // Plugin shutdown logic
-    }
+public final class VarBlocks extends BasePlugin {
 }

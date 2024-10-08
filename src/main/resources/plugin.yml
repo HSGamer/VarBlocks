@@ -2,5 +2,5 @@ name: VarBlocks
 version: '${project.version}'
 main: me.hsgamer.varblocks.VarBlocks
 api-version: '1.13'
-softdepend: [PlaceholderAPI]
-authors: [HSGamer]
+softdepend: [ PlaceholderAPI ]
+authors: [ HSGamer ]
