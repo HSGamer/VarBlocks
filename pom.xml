@@ -139,6 +139,11 @@
             <artifactId>hscore-variable</artifactId>
             <version>${core.version}</version>
         </dependency>
+        <dependency>
+            <groupId>me.hsgamer</groupId>
+            <artifactId>hscore-bukkit-variable</artifactId>
+            <version>${core.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>me.clip</groupId>
