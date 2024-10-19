@@ -3,6 +3,7 @@ package me.hsgamer.varblocks.task;
 import io.github.projectunified.minelib.plugin.base.Loadable;
 import io.github.projectunified.minelib.scheduler.async.AsyncScheduler;
 import io.github.projectunified.minelib.scheduler.common.task.Task;
+import io.github.projectunified.minelib.scheduler.location.LocationScheduler;
 import me.hsgamer.varblocks.VarBlocks;
 import me.hsgamer.varblocks.api.BlockEntry;
 import me.hsgamer.varblocks.api.BlockUpdater;
@@ -16,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class BlockUpdateTask implements Loadable {
     private final VarBlocks plugin;
@@ -29,9 +31,12 @@ public class BlockUpdateTask implements Loadable {
     public void enable() {
         task = AsyncScheduler.get(plugin).runTimer(new Runnable() {
             private final Queue<BlockEntry> queue = new LinkedList<>();
+            private final AtomicBoolean updating = new AtomicBoolean(false);
 
             @Override
             public void run() {
+                if (updating.get()) return;
+
                 if (queue.isEmpty()) {
                     queue.addAll(plugin.get(BlockManager.class).getBlockEntries());
                     return;
@@ -41,7 +46,6 @@ public class BlockUpdateTask implements Loadable {
                 if (entry == null || !entry.valid()) return;
 
                 Location location = entry.location();
-                Block block = location.getBlock();
 
                 Optional<BlockUpdater> updaterOptional = plugin.get(BlockUpdaterManager.class).getBlockUpdater(entry.type);
                 if (!updaterOptional.isPresent()) return;
@@ -49,7 +53,14 @@ public class BlockUpdateTask implements Loadable {
 
                 List<String> args = plugin.get(TemplateManager.class).getParsedTemplate(entry.template, entry.args);
 
-                updater.updateBlock(block, args);
+                updating.set(true);
+                LocationScheduler.get(plugin, location).run(() -> {
+                    Block block = location.getBlock();
+                    if (block.getChunk().isLoaded()) {
+                        updater.updateBlock(location.getBlock(), args);
+                    }
+                    updating.set(false);
+                });
             }
         }, 0, 0);
     }
