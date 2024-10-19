@@ -37,7 +37,7 @@ public class BlockManager implements Loadable {
         return Optional.ofNullable(blockEntryCache.get().get(location));
     }
 
-    public void addBlockEntry(String name, BlockEntry blockEntry) {
+    public void setBlockEntry(String name, BlockEntry blockEntry) {
         blockEntryMap.put(name, blockEntry);
         saveConfig();
         updateCache();

@@ -45,7 +45,7 @@ public class AddCommand extends SubCommand {
         }
 
         BlockEntry blockEntry = new BlockEntry(block.getWorld().getName(), block.getX(), block.getY(), block.getZ(), type, template, Collections.emptyMap());
-        plugin.get(BlockManager.class).addBlockEntry(name, blockEntry);
+        plugin.get(BlockManager.class).setBlockEntry(name, blockEntry);
 
         MessageUtils.sendMessage(sender, "&aThe block with the name " + name + " has been added");
     }
