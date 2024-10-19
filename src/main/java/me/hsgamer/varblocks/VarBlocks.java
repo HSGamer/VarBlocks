@@ -6,6 +6,7 @@ import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.hscore.bukkit.variable.BukkitVariableBundle;
 import me.hsgamer.hscore.variable.VariableBundle;
 import me.hsgamer.varblocks.command.MainCommand;
+import me.hsgamer.varblocks.listener.BlockListener;
 import me.hsgamer.varblocks.manager.BlockManager;
 import me.hsgamer.varblocks.manager.BlockUpdaterManager;
 import me.hsgamer.varblocks.manager.TemplateManager;
@@ -27,7 +28,8 @@ public final class VarBlocks extends BasePlugin {
                 new BlockUpdateTask(this),
 
                 new Permissions(this),
-                new CommandComponent(this, new MainCommand(this))
+                new CommandComponent(this, new MainCommand(this)),
+                new BlockListener(this)
         );
     }
 
