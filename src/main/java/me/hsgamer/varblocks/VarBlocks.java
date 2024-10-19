@@ -2,6 +2,7 @@ package me.hsgamer.varblocks;
 
 import io.github.projectunified.minelib.plugin.base.BasePlugin;
 import io.github.projectunified.minelib.plugin.command.CommandComponent;
+import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.hscore.bukkit.variable.BukkitVariableBundle;
 import me.hsgamer.hscore.variable.VariableBundle;
 import me.hsgamer.varblocks.command.MainCommand;
@@ -33,6 +34,7 @@ public final class VarBlocks extends BasePlugin {
     @Override
     public void load() {
         BukkitVariableBundle.registerVariables(variableBundle);
+        MessageUtils.setPrefix("&8[&6VarBlocks&8] ");
     }
 
     @Override

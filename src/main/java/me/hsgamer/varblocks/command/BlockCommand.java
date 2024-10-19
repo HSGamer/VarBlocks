@@ -4,6 +4,8 @@ import io.github.projectunified.minelib.util.subcommand.SubCommand;
 import io.github.projectunified.minelib.util.subcommand.SubCommandManager;
 import me.hsgamer.varblocks.Permissions;
 import me.hsgamer.varblocks.VarBlocks;
+import me.hsgamer.varblocks.command.block.AddCommand;
+import me.hsgamer.varblocks.command.block.RemoveCommand;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,6 +16,8 @@ public class BlockCommand extends SubCommand {
 
     public BlockCommand(VarBlocks plugin) {
         super("block", "Block commands", "<label> block", Permissions.BLOCK.getName(), true);
+        subCommandManager.registerSubcommand(new AddCommand(plugin));
+        subCommandManager.registerSubcommand(new RemoveCommand(plugin));
     }
 
     @Override

@@ -21,6 +21,10 @@ public class BlockManager implements Loadable {
         config.setup();
     }
 
+    public List<String> getBlockNames() {
+        return new ArrayList<>(blockEntryMap.keySet());
+    }
+
     public List<BlockEntry> getBlockEntries() {
         return new ArrayList<>(blockEntryMap.values());
     }
