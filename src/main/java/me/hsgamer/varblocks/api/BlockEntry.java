@@ -8,6 +8,7 @@ import org.bukkit.World;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 public class BlockEntry {
@@ -75,14 +76,14 @@ public class BlockEntry {
         return new BlockEntry(world, x, y, z, type, template, args);
     }
 
-    public BlockEntry withArgs(Map<String, String> args) {
+    public BlockEntry withArguments(Map<String, String> args) {
         return new BlockEntry(world, x, y, z, type, template, args);
     }
 
-    public BlockEntry withArg(String key, String value) {
+    public BlockEntry withArgument(String key, String value) {
         Map<String, String> newArgs = new LinkedHashMap<>(args);
         newArgs.put(key, value);
-        return new BlockEntry(world, x, y, z, type, template, newArgs);
+        return withArguments(newArgs);
     }
 
     public boolean valid() {
@@ -91,5 +92,18 @@ public class BlockEntry {
 
     public Location location() {
         return new Location(Bukkit.getWorld(world), x, y, z);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BlockEntry that = (BlockEntry) o;
+        return x == that.x && y == that.y && z == that.z && Objects.equals(world, that.world) && Objects.equals(type, that.type) && Objects.equals(template, that.template) && Objects.equals(args, that.args);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(world, x, y, z, type, template, args);
     }
 }
