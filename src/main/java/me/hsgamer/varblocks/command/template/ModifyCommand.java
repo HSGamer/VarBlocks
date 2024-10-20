@@ -42,9 +42,9 @@ public abstract class ModifyCommand extends SubCommand {
 
         if (modify(sender, label, template, newArgs)) {
             templateManager.saveTemplate(name, template);
-            MessageUtils.sendMessage(sender, "&aThe template &2" + name + "&ahas been modified");
+            MessageUtils.sendMessage(sender, "&aThe template &2" + name + " &ahas been modified");
         } else {
-            MessageUtils.sendMessage(sender, "&cThe template &f" + name + "&chasn't be modified");
+            MessageUtils.sendMessage(sender, "&cThe template &4" + name + " &chasn't be modified");
         }
     }
 
