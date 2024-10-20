@@ -1,6 +1,7 @@
 package me.hsgamer.varblocks.command.template;
 
 import io.github.projectunified.minelib.util.subcommand.SubCommand;
+import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.varblocks.Permissions;
 import me.hsgamer.varblocks.VarBlocks;
 import me.hsgamer.varblocks.manager.TemplateManager;
@@ -41,9 +42,9 @@ public abstract class ModifyCommand extends SubCommand {
 
         if (modify(sender, label, template, newArgs)) {
             templateManager.saveTemplate(name, template);
-            sender.sendMessage("The template " + name + " has been modified");
+            MessageUtils.sendMessage(sender, "&aThe template &2" + name + "&ahas been modified");
         } else {
-            sender.sendMessage("The template " + name + " hasn't been modified");
+            MessageUtils.sendMessage(sender, "&cThe template &f" + name + "&chasn't be modified");
         }
     }
 
