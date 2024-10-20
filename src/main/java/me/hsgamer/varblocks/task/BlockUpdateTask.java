@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 public class BlockUpdateTask implements Loadable {
     private final VarBlocks plugin;
@@ -55,11 +56,16 @@ public class BlockUpdateTask implements Loadable {
 
                 updating.set(true);
                 LocationScheduler.get(plugin, location).run(() -> {
-                    Block block = location.getBlock();
-                    if (block.getChunk().isLoaded()) {
-                        updater.updateBlock(location.getBlock(), args);
+                    try {
+                        Block block = location.getBlock();
+                        if (block.getChunk().isLoaded()) {
+                            updater.updateBlock(location.getBlock(), args);
+                        }
+                    } catch (Throwable throwable) {
+                        plugin.getLogger().log(Level.WARNING, "Error while updating block at " + location, throwable);
+                    } finally {
+                        updating.set(false);
                     }
-                    updating.set(false);
                 });
             }
         }, 0, 0);
