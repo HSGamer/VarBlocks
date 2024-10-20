@@ -1,5 +1,6 @@
 package me.hsgamer.varblocks.updater;
 
+import me.hsgamer.hscore.bukkit.utils.ColorUtils;
 import me.hsgamer.varblocks.api.BlockUpdater;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -15,11 +16,8 @@ public class SignUpdater implements BlockUpdater {
         Sign sign = (Sign) blockState;
 
         for (int i = 0; i < 4; i++) {
-            if (args.size() > i) {
-                sign.setLine(i, args.get(i));
-            } else {
-                sign.setLine(i, "");
-            }
+            String line = args.size() > i ? ColorUtils.colorize(args.get(i)) : "";
+            sign.setLine(i, line);
         }
 
         sign.update(false, false);
