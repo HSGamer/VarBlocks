@@ -5,6 +5,8 @@ import me.hsgamer.varblocks.api.BlockEntry;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+
 public class ArgumentCommand extends ModifyCommand {
     public ArgumentCommand(VarBlocks plugin) {
         super(plugin, "argument", "Set the value of the argument of the block", "<argument> <value>", true);
@@ -13,8 +15,7 @@ public class ArgumentCommand extends ModifyCommand {
     @Override
     protected BlockEntry modify(@NotNull CommandSender sender, @NotNull String label, @NotNull BlockEntry blockEntry, @NotNull String... args) {
         String argument = args[0];
-        String[] value = new String[args.length - 1];
-        System.arraycopy(args, 1, value, 0, value.length);
+        String[] value = Arrays.copyOfRange(args, 1, args.length);
         return blockEntry.withArgument(argument, String.join(" ", value));
     }
 

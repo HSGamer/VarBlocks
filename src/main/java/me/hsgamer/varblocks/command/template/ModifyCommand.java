@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -37,8 +38,7 @@ public abstract class ModifyCommand extends SubCommand {
 
         List<String> template = new ArrayList<>(templateManager.getTemplate(name));
 
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+        String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
 
         if (modify(sender, label, template, newArgs)) {
             templateManager.saveTemplate(name, template);
@@ -53,8 +53,7 @@ public abstract class ModifyCommand extends SubCommand {
         if (args.length < 1) {
             return false;
         }
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+        String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
         return isProperArgUsage(sender, label, newArgs);
     }
 
@@ -69,8 +68,7 @@ public abstract class ModifyCommand extends SubCommand {
 
         List<String> template = plugin.get(TemplateManager.class).getTemplate(args[0]);
 
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+        String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
         return onModifyTabComplete(sender, label, template, newArgs);
     }
 }

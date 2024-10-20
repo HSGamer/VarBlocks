@@ -9,10 +9,7 @@ import me.hsgamer.varblocks.manager.BlockManager;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 public abstract class ModifyCommand extends SubCommand {
     protected final VarBlocks plugin;
@@ -44,8 +41,7 @@ public abstract class ModifyCommand extends SubCommand {
         }
         BlockEntry blockEntry = optionalBlockEntry.get();
 
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+        String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
 
         BlockEntry newBlockEntry = modify(sender, label, blockEntry, newArgs);
         if (!Objects.equals(blockEntry, newBlockEntry)) {
@@ -61,8 +57,7 @@ public abstract class ModifyCommand extends SubCommand {
         if (args.length < 1) {
             return false;
         }
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+        String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
         return isProperArgUsage(sender, label, newArgs);
     }
 
@@ -74,8 +69,7 @@ public abstract class ModifyCommand extends SubCommand {
         if (args.length == 1) {
             return plugin.get(BlockManager.class).getBlockNames();
         }
-        String[] newArgs = new String[args.length - 1];
-        System.arraycopy(args, 1, newArgs, 0, newArgs.length);
+        String[] newArgs = Arrays.copyOfRange(args, 1, args.length);
         return onModifyTabComplete(sender, label, newArgs);
     }
 }
