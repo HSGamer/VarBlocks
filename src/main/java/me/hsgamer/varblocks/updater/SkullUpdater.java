@@ -12,10 +12,13 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 public class SkullUpdater implements BlockUpdater {
+    private static final Pattern playerNamePattern = Pattern.compile("[a-zA-Z0-9_]{1,16}");
     private static final UUID skullUUID = UUID.fromString("832b9c2d-f6c2-4c5f-8e0d-e7e7c4e9f9c8");
     private static Method setOwningPlayerMethod;
     private static Method setOwnerMethod;
@@ -58,12 +61,13 @@ public class SkullUpdater implements BlockUpdater {
             String arg = args.get(0);
             boolean isPlayerName = args.size() > 1 && Boolean.parseBoolean(args.get(1));
             if (isPlayerName) {
-                @SuppressWarnings("deprecation") OfflinePlayer player = Bukkit.getOfflinePlayer(arg);
-                if (player.hasPlayedBefore()) {
-                    uuid = player.getUniqueId();
-                } else {
-                    uuid = skullUUID;
-                }
+                //noinspection deprecation
+                uuid = Optional.of(arg)
+                        .filter(s -> playerNamePattern.matcher(s).matches())
+                        .map(Bukkit::getOfflinePlayer)
+                        .filter(OfflinePlayer::hasPlayedBefore)
+                        .map(OfflinePlayer::getUniqueId)
+                        .orElse(skullUUID);
             } else {
                 uuid = Validate.getUUID(arg).orElse(skullUUID);
             }
