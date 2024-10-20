@@ -23,7 +23,11 @@ public class TemplateManager {
     }
 
     public void saveTemplate(String name, List<String> template) {
-        config.set(template, name);
+        if (template.isEmpty()) {
+            config.remove(name);
+        } else {
+            config.set(template, name);
+        }
         config.save();
     }
 
