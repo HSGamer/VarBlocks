@@ -1,5 +1,6 @@
 package me.hsgamer.varblocks.updater;
 
+import com.cryptomorin.xseries.profiles.exceptions.InvalidProfileException;
 import com.cryptomorin.xseries.profiles.objects.ProfileContainer;
 import com.cryptomorin.xseries.profiles.objects.Profileable;
 import me.hsgamer.varblocks.api.BlockUpdater;
@@ -24,7 +25,7 @@ public class SkullUpdater implements BlockUpdater {
         try {
             profileable = Profileable.detect(args.get(0));
             profileContainer.setProfile(profileable.getProfile());
-        } catch (IllegalArgumentException e) {
+        } catch (InvalidProfileException e) {
             return;
         }
 
