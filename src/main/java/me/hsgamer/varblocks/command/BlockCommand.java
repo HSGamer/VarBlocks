@@ -4,8 +4,8 @@ import io.github.projectunified.minelib.util.subcommand.SubCommand;
 import io.github.projectunified.minelib.util.subcommand.SubCommandManager;
 import me.hsgamer.varblocks.Permissions;
 import me.hsgamer.varblocks.VarBlocks;
-import me.hsgamer.varblocks.command.block.TemplateCommand;
 import me.hsgamer.varblocks.command.block.*;
+import me.hsgamer.varblocks.command.block.TemplateCommand;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
