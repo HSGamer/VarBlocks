@@ -13,68 +13,84 @@ import me.hsgamer.varblocks.manager.TemplateManager;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class BlockUpdateTask implements Loadable {
     private final VarBlocks plugin;
-    private Task task;
+    private final Queue<BlockEntry> updateQueue = new LinkedList<>();
+    private final Queue<Map.Entry<Location, Consumer<Block>>> setBlockQueue = new ConcurrentLinkedQueue<>();
+    private final AtomicBoolean blockSetting = new AtomicBoolean(false);
+    private Task updateTask;
+    private Task setBlockTask;
 
     public BlockUpdateTask(VarBlocks plugin) {
         this.plugin = plugin;
     }
 
+    private void onUpdate() {
+        BlockEntry entry = updateQueue.poll();
+        if (entry == null) {
+            updateQueue.addAll(plugin.get(BlockManager.class).getBlockEntries());
+            return;
+        }
+
+        if (!entry.valid()) return;
+        Location location = entry.location();
+
+        Optional<BlockUpdater> updaterOptional = plugin.get(BlockUpdaterManager.class).getBlockUpdater(entry.type);
+        if (!updaterOptional.isPresent()) return;
+        BlockUpdater updater = updaterOptional.get();
+
+        List<String> args = plugin.get(TemplateManager.class).getParsedTemplate(entry.template, entry.args);
+
+        Consumer<Block> consumer = updater.getUpdateTask(args);
+        if (consumer != null) {
+            setBlockQueue.add(new AbstractMap.SimpleEntry<>(location, consumer));
+        }
+    }
+
+    private void onBlockSet() {
+        if (blockSetting.get()) return;
+
+        Map.Entry<Location, Consumer<Block>> entry = setBlockQueue.poll();
+        if (entry == null) return;
+
+        Location location = entry.getKey();
+
+        blockSetting.set(true);
+        LocationScheduler.get(plugin, location).run(() -> {
+            try {
+                Block block = location.getBlock();
+                if (block.getChunk().isLoaded()) {
+                    entry.getValue().accept(block);
+                }
+            } catch (Throwable throwable) {
+                plugin.getLogger().log(Level.WARNING, "Error while updating block at " + location, throwable);
+            } finally {
+                blockSetting.set(false);
+            }
+        });
+    }
+
     @Override
     public void enable() {
-        task = AsyncScheduler.get(plugin).runTimer(new Runnable() {
-            private final Queue<BlockEntry> queue = new LinkedList<>();
-            private final AtomicBoolean updating = new AtomicBoolean(false);
-
-            @Override
-            public void run() {
-                if (updating.get()) return;
-
-                if (queue.isEmpty()) {
-                    queue.addAll(plugin.get(BlockManager.class).getBlockEntries());
-                    return;
-                }
-
-                BlockEntry entry = queue.poll();
-                if (entry == null || !entry.valid()) return;
-
-                Location location = entry.location();
-
-                Optional<BlockUpdater> updaterOptional = plugin.get(BlockUpdaterManager.class).getBlockUpdater(entry.type);
-                if (!updaterOptional.isPresent()) return;
-                BlockUpdater updater = updaterOptional.get();
-
-                List<String> args = plugin.get(TemplateManager.class).getParsedTemplate(entry.template, entry.args);
-
-                updating.set(true);
-                LocationScheduler.get(plugin, location).run(() -> {
-                    try {
-                        Block block = location.getBlock();
-                        if (block.getChunk().isLoaded()) {
-                            updater.updateBlock(location.getBlock(), args);
-                        }
-                    } catch (Throwable throwable) {
-                        plugin.getLogger().log(Level.WARNING, "Error while updating block at " + location, throwable);
-                    } finally {
-                        updating.set(false);
-                    }
-                });
-            }
-        }, 0, 0);
+        updateTask = AsyncScheduler.get(plugin).runTimer(this::onUpdate, 0, 0);
+        setBlockTask = AsyncScheduler.get(plugin).runTimer(this::onBlockSet, 0, 0);
     }
 
     @Override
     public void disable() {
-        if (task != null) {
-            task.cancel();
+        if (updateTask != null) {
+            updateTask.cancel();
+            updateTask = null;
+        }
+        if (setBlockTask != null) {
+            setBlockTask.cancel();
+            setBlockTask = null;
         }
     }
 }
