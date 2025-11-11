@@ -11,6 +11,7 @@ import me.hsgamer.varblocks.manager.BlockManager;
 import me.hsgamer.varblocks.manager.BlockUpdaterManager;
 import me.hsgamer.varblocks.manager.TemplateManager;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import java.util.*;
@@ -64,9 +65,12 @@ public class BlockUpdateTask implements Loadable {
         blockSetting.set(true);
         LocationScheduler.get(plugin, location).run(() -> {
             try {
-                Block block = location.getBlock();
-                if (block.getChunk().isLoaded()) {
-                    entry.getValue().accept(block);
+                World world = location.getWorld();
+                assert world != null;
+                int chunkX = location.getBlockX() >> 4;
+                int chunkZ = location.getBlockZ() >> 4;
+                if (world.isChunkLoaded(chunkX, chunkZ)) {
+                    entry.getValue().accept(location.getBlock());
                 }
             } catch (Throwable throwable) {
                 plugin.getLogger().log(Level.WARNING, "Error while updating block at " + location, throwable);
