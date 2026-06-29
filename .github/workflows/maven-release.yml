@@ -17,7 +17,7 @@ jobs:
         id: changelog
         uses: metcalfc/changelog-generator@v4.7.0
         with:
-          myToken: ${{ secrets.GITHUB_TOKEN }}
+          mytoken: ${{ secrets.GITHUB_TOKEN }}
       - name: Save to CHANGELOG
         run: echo "${{ steps.changelog.outputs.changelog }}" > CHANGELOG.md
 
