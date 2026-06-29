@@ -51,6 +51,10 @@
                                     <shadedPattern>me.hsgamer.varblocks.minelib</shadedPattern>
                                 </relocation>
                                 <relocation>
+                                    <pattern>io.github.projectunified.maptemplate</pattern>
+                                    <shadedPattern>me.hsgamer.varblocks.maptemplate</shadedPattern>
+                                </relocation>
+                                <relocation>
                                     <pattern>com.cryptomorin.xseries</pattern>
                                     <shadedPattern>me.hsgamer.varblocks.xseries</shadedPattern>
                                 </relocation>
