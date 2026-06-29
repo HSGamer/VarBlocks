@@ -18,9 +18,9 @@ public class BlockEntry {
     public final int z;
     public final String type;
     public final String template;
-    public final Map<String, String> args;
+    public final Map<String, Object> args;
 
-    public BlockEntry(String world, int x, int y, int z, String type, String template, Map<String, String> args) {
+    public BlockEntry(String world, int x, int y, int z, String type, String template, Map<String, Object> args) {
         this.world = world;
         this.x = x;
         this.y = y;
@@ -37,7 +37,7 @@ public class BlockEntry {
         int z = Optional.ofNullable(map.get("z")).map(Object::toString).flatMap(Validate::getNumber).map(Number::intValue).orElse(0);
         String type = Optional.ofNullable(map.get("type")).map(Object::toString).orElse("");
         String template = Optional.ofNullable(map.get("template")).map(Object::toString).orElse("");
-        Map<String, String> args = new LinkedHashMap<>();
+        Map<String, Object> args = new LinkedHashMap<>();
         Optional.ofNullable(map.get("args"))
                 .flatMap(MapUtils::castOptionalStringObjectMap)
                 .ifPresent(rawArgs -> rawArgs.forEach((key, value) -> args.put(key, value.toString())));
@@ -76,12 +76,12 @@ public class BlockEntry {
         return new BlockEntry(world, x, y, z, type, template, args);
     }
 
-    public BlockEntry withArguments(Map<String, String> args) {
+    public BlockEntry withArguments(Map<String, Object> args) {
         return new BlockEntry(world, x, y, z, type, template, args);
     }
 
     public BlockEntry withArgument(String key, String value) {
-        Map<String, String> newArgs = new LinkedHashMap<>(args);
+        Map<String, Object> newArgs = new LinkedHashMap<>(args);
         newArgs.put(key, value);
         return withArguments(newArgs);
     }

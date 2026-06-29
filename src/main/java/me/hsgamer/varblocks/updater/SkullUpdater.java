@@ -1,11 +1,11 @@
 package me.hsgamer.varblocks.updater;
 
+import com.cryptomorin.xseries.profiles.gameprofile.MojangGameProfile;
 import com.cryptomorin.xseries.profiles.objects.ProfileContainer;
 import com.cryptomorin.xseries.profiles.objects.Profileable;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.mojang.authlib.GameProfile;
 import me.hsgamer.varblocks.api.BlockUpdater;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -39,7 +39,7 @@ public class SkullUpdater implements BlockUpdater {
         boolean showErrors = args.size() > 1 && args.get(1).equalsIgnoreCase("true");
 
         Plugin plugin = JavaPlugin.getProvidingPlugin(getClass());
-        GameProfile gameProfile;
+        MojangGameProfile gameProfile;
         try {
             Profileable profileable = cache.get(args.get(0));
             gameProfile = profileable.getProfile();
