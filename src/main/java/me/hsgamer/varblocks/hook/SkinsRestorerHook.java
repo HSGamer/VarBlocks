@@ -2,6 +2,7 @@ package me.hsgamer.varblocks.hook;
 
 import net.skinsrestorer.api.PropertyUtils;
 import net.skinsrestorer.api.SkinsRestorerProvider;
+import net.skinsrestorer.api.VersionProvider;
 import net.skinsrestorer.api.exception.DataRequestException;
 import net.skinsrestorer.api.property.InputDataResult;
 import org.bukkit.Bukkit;
@@ -16,7 +17,10 @@ public final class SkinsRestorerHook {
     }
 
     public static boolean isAvailable() {
-        return Bukkit.getPluginManager().isPluginEnabled("SkinRestorer");
+        if (!Bukkit.getPluginManager().isPluginEnabled("SkinsRestorer")) {
+            return false;
+        }
+        return VersionProvider.isCompatibleWith("15");
     }
 
     public static Optional<String> getTextureUrl(UUID uuid) {
