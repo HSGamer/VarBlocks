@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class SkullUpdater implements BlockUpdater {
-    private final LoadingCache<String, MojangGameProfile> cache = CacheBuilder.newBuilder().build(new CacheLoader<String, MojangGameProfile>() {
+    private static final LoadingCache<String, MojangGameProfile> PROFILE_CACHE = CacheBuilder.newBuilder().build(new CacheLoader<String, MojangGameProfile>() {
         @SuppressWarnings("UnstableApiUsage")
         @Override
         public @NotNull MojangGameProfile load(@NotNull String key) {
@@ -75,7 +75,7 @@ public class SkullUpdater implements BlockUpdater {
         Plugin plugin = JavaPlugin.getProvidingPlugin(getClass());
         MojangGameProfile gameProfile;
         try {
-            gameProfile = cache.get(args.get(0));
+            gameProfile = PROFILE_CACHE.get(args.get(0));
         } catch (Throwable e) {
             if (showErrors) {
                 plugin.getLogger().log(Level.WARNING, "Error while trying to update skull profile", e);
