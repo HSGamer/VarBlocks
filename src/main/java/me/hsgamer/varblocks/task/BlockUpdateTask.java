@@ -56,7 +56,7 @@ public class BlockUpdateTask implements Loadable {
         {
             Map.Entry<Location, Consumer<Block>> blockEntry;
             while ((blockEntry = setBlockQueue.poll()) != null) {
-                setBlockMap.merge(blockEntry.getKey(), blockEntry.getValue(), Consumer::andThen);
+                setBlockMap.put(blockEntry.getKey(), blockEntry.getValue());
             }
         }
 
