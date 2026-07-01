@@ -38,20 +38,14 @@ public class SkullUpdater implements BlockUpdater {
             if (player != null) {
                 profileable = Profileable.of(player);
             } else {
-                OfflinePlayer offlinePlayer;
                 try {
                     UUID uuid = UUID.fromString(key);
-                    offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                } catch (Throwable i1) {
-                    try {
-                        //noinspection deprecation
-                        offlinePlayer = Bukkit.getOfflinePlayer(key);
-                    } catch (Throwable i2) {
-                        offlinePlayer = null;
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+                    if (offlinePlayer.hasPlayedBefore()) {
+                        profileable = Profileable.of(offlinePlayer);
                     }
-                }
-                if (offlinePlayer != null && offlinePlayer.hasPlayedBefore()) {
-                    profileable = Profileable.of(offlinePlayer);
+                } catch (Throwable ignored) {
+                    // IGNORED
                 }
             }
             if (profileable == null) {
