@@ -15,7 +15,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Skull;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,8 +53,6 @@ public class SkullUpdater implements BlockUpdater {
         }
     });
 
-    private final Plugin plugin = JavaPlugin.getProvidingPlugin(getClass());
-
     private static @NotNull Profileable resolveProfileable(String key) {
         Player player = Bukkit.getPlayer(key);
         if (player != null) {
@@ -87,7 +84,7 @@ public class SkullUpdater implements BlockUpdater {
             gameProfile = PROFILE_CACHE.get(args.get(0)).orElse(null);
         } catch (Throwable e) {
             if (showErrors) {
-                plugin.getLogger().log(Level.WARNING, "Error while trying to update skull profile", e);
+                JavaPlugin.getProvidingPlugin(getClass()).getLogger().log(Level.WARNING, "Error while trying to update skull profile", e);
             }
             gameProfile = null;
         }
@@ -102,7 +99,7 @@ public class SkullUpdater implements BlockUpdater {
                 profileContainer.setProfile(finalGameProfile);
             } catch (Throwable e) {
                 if (showErrors) {
-                    plugin.getLogger().log(Level.WARNING, "Error while trying to update skull profile", e);
+                    JavaPlugin.getProvidingPlugin(getClass()).getLogger().log(Level.WARNING, "Error while trying to update skull profile", e);
                 }
                 profileContainer.setProfile(null);
                 return;
