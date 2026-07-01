@@ -8,6 +8,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import me.hsgamer.varblocks.api.BlockUpdater;
+import me.hsgamer.varblocks.hook.SkinsRestorerHook;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
@@ -20,12 +21,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class SkullUpdater implements BlockUpdater {
-    private static final LoadingCache<String, MojangGameProfile> PROFILE_CACHE = CacheBuilder.newBuilder().build(new CacheLoader<String, MojangGameProfile>() {
+    private static final LoadingCache<String, MojangGameProfile> PROFILE_CACHE = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, MojangGameProfile>() {
         @SuppressWarnings("UnstableApiUsage")
         @Override
         public @NotNull MojangGameProfile load(@NotNull String key) {
@@ -36,10 +39,22 @@ public class SkullUpdater implements BlockUpdater {
             Profileable profileable = null;
             Player player = Bukkit.getPlayer(key);
             if (player != null) {
+                if (SkinsRestorerHook.isAvailable()) {
+                    Optional<String> url = SkinsRestorerHook.getTextureUrl(player);
+                    if (url.isPresent()) {
+                        return ProfileInputType.TEXTURE_URL.getProfile(url.get());
+                    }
+                }
                 profileable = Profileable.of(player);
             } else {
                 try {
                     UUID uuid = UUID.fromString(key);
+                    if (SkinsRestorerHook.isAvailable()) {
+                        Optional<String> url = SkinsRestorerHook.getTextureUrl(uuid);
+                        if (url.isPresent()) {
+                            return ProfileInputType.TEXTURE_URL.getProfile(url.get());
+                        }
+                    }
                     OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                     if (offlinePlayer.hasPlayedBefore()) {
                         profileable = Profileable.of(offlinePlayer);
@@ -49,6 +64,12 @@ public class SkullUpdater implements BlockUpdater {
                 }
             }
             if (profileable == null) {
+                if (SkinsRestorerHook.isAvailable()) {
+                    Optional<String> url = SkinsRestorerHook.getTextureUrl(key);
+                    if (url.isPresent()) {
+                        return ProfileInputType.TEXTURE_URL.getProfile(url.get());
+                    }
+                }
                 profileable = Profileable.detect(key);
             }
             MojangGameProfile gameProfile = profileable.getProfile();

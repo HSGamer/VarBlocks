@@ -3,5 +3,7 @@ version: '${project.version}'
 main: me.hsgamer.varblocks.VarBlocks
 api-version: '1.13'
 folia-supported: true
-softdepend: [ PlaceholderAPI ]
+softdepend:
+  - PlaceholderAPI
+  - SkinsRestorer
 authors: [ HSGamer ]
