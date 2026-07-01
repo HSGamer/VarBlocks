@@ -20,22 +20,20 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class SkullUpdater implements BlockUpdater {
+    private static final Map<String, MojangGameProfile> STATIC_PROFILE_CACHE = new ConcurrentHashMap<>();
     private static final LoadingCache<String, Optional<MojangGameProfile>> PROFILE_CACHE = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<MojangGameProfile>>() {
         @SuppressWarnings("UnstableApiUsage")
         @Override
         public @NotNull Optional<MojangGameProfile> load(@NotNull String key) {
-            ProfileInputType profileInputType = ProfileInputType.typeOf(key);
-            if (profileInputType != null && profileInputType != ProfileInputType.UUID && profileInputType != ProfileInputType.USERNAME) {
-                return Optional.ofNullable(profileInputType.getProfile(key));
-            }
-
             if (SkinsRestorerHook.isAvailable()) {
                 Optional<String> url = SkinsRestorerHook.getUrl(key);
                 if (url.isPresent()) {
@@ -81,7 +79,18 @@ public class SkullUpdater implements BlockUpdater {
 
         MojangGameProfile gameProfile;
         try {
-            gameProfile = PROFILE_CACHE.get(args.get(0)).orElse(null);
+            String key = args.get(0);
+            if (STATIC_PROFILE_CACHE.containsKey(key)) {
+                gameProfile = STATIC_PROFILE_CACHE.get(key);
+            } else {
+                ProfileInputType profileInputType = ProfileInputType.typeOf(key);
+                if (profileInputType != null && profileInputType != ProfileInputType.UUID && profileInputType != ProfileInputType.USERNAME) {
+                    gameProfile = profileInputType.getProfile(key);
+                    STATIC_PROFILE_CACHE.put(key, gameProfile);
+                } else {
+                    gameProfile = PROFILE_CACHE.get(key).orElse(null);
+                }
+            }
         } catch (Throwable e) {
             if (showErrors) {
                 JavaPlugin.getProvidingPlugin(getClass()).getLogger().log(Level.WARNING, "Error while trying to update skull profile", e);
