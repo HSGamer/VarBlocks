@@ -54,11 +54,12 @@ public class SkullUpdater implements BlockUpdater {
                     profileable = Profileable.of(offlinePlayer);
                 }
             }
-            if (profileable != null) {
-                MojangGameProfile gameProfile = profileable.getProfile();
-                if (gameProfile != null) {
-                    return gameProfile;
-                }
+            if (profileable == null) {
+                profileable = Profileable.detect(key);
+            }
+            MojangGameProfile gameProfile = profileable.getProfile();
+            if (gameProfile != null) {
+                return gameProfile;
             }
             throw new IllegalStateException("Invalid profile key: " + key);
         }
