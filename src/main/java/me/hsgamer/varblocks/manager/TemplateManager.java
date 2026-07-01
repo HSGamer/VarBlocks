@@ -57,7 +57,7 @@ public class TemplateManager {
                     if (args.containsKey(s)) {
                         return args.get(s);
                     }
-                    return variableManager.replaceOrOriginal(s, null);
+                    return variableManager.tryReplace(s, null);
                 })
                 .build();
         //noinspection unchecked
