@@ -28,57 +28,52 @@ import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class SkullUpdater implements BlockUpdater {
-    private static final LoadingCache<String, MojangGameProfile> PROFILE_CACHE = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, MojangGameProfile>() {
+    private static final LoadingCache<String, Optional<MojangGameProfile>> PROFILE_CACHE = CacheBuilder.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(new CacheLoader<String, Optional<MojangGameProfile>>() {
         @SuppressWarnings("UnstableApiUsage")
         @Override
-        public @NotNull MojangGameProfile load(@NotNull String key) {
+        public @NotNull Optional<MojangGameProfile> load(@NotNull String key) {
             ProfileInputType profileInputType = ProfileInputType.typeOf(key);
             if (profileInputType != null && profileInputType != ProfileInputType.UUID && profileInputType != ProfileInputType.USERNAME) {
-                return profileInputType.getProfile(key);
+                return Optional.ofNullable(profileInputType.getProfile(key));
             }
-            Profileable profileable = null;
-            Player player = Bukkit.getPlayer(key);
-            if (player != null) {
-                if (SkinsRestorerHook.isAvailable()) {
-                    Optional<String> url = SkinsRestorerHook.getTextureUrl(player);
-                    if (url.isPresent()) {
-                        return ProfileInputType.TEXTURE_URL.getProfile(url.get());
-                    }
-                }
-                profileable = Profileable.of(player);
-            } else {
-                try {
-                    UUID uuid = UUID.fromString(key);
-                    if (SkinsRestorerHook.isAvailable()) {
-                        Optional<String> url = SkinsRestorerHook.getTextureUrl(uuid);
-                        if (url.isPresent()) {
-                            return ProfileInputType.TEXTURE_URL.getProfile(url.get());
-                        }
-                    }
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
-                    if (offlinePlayer.hasPlayedBefore()) {
-                        profileable = Profileable.of(offlinePlayer);
-                    }
-                } catch (Throwable ignored) {
-                    // IGNORED
+
+            if (SkinsRestorerHook.isAvailable()) {
+                Optional<String> url = SkinsRestorerHook.getUrl(key);
+                if (url.isPresent()) {
+                    return Optional.ofNullable(ProfileInputType.TEXTURE_URL.getProfile(url.get()));
                 }
             }
-            if (profileable == null) {
-                if (SkinsRestorerHook.isAvailable()) {
-                    Optional<String> url = SkinsRestorerHook.getTextureUrl(key);
-                    if (url.isPresent()) {
-                        return ProfileInputType.TEXTURE_URL.getProfile(url.get());
-                    }
-                }
-                profileable = Profileable.detect(key);
-            }
+
+            Profileable profileable = resolveProfileable(key);
             MojangGameProfile gameProfile = profileable.getProfile();
             if (gameProfile != null) {
-                return gameProfile;
+                return Optional.of(gameProfile);
             }
-            throw new IllegalStateException("Invalid profile key: " + key);
+
+            return Optional.empty();
         }
     });
+
+    private final Plugin plugin = JavaPlugin.getProvidingPlugin(getClass());
+
+    private static @NotNull Profileable resolveProfileable(String key) {
+        Player player = Bukkit.getPlayer(key);
+        if (player != null) {
+            return Profileable.of(player);
+        }
+
+        try {
+            UUID uuid = UUID.fromString(key);
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            if (offlinePlayer.hasPlayedBefore()) {
+                return Profileable.of(offlinePlayer);
+            }
+        } catch (IllegalArgumentException ignored) {
+            // IGNORED
+        }
+
+        return Profileable.detect(key);
+    }
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
@@ -87,10 +82,9 @@ public class SkullUpdater implements BlockUpdater {
 
         boolean showErrors = args.size() > 1 && args.get(1).equalsIgnoreCase("true");
 
-        Plugin plugin = JavaPlugin.getProvidingPlugin(getClass());
         MojangGameProfile gameProfile;
         try {
-            gameProfile = PROFILE_CACHE.get(args.get(0));
+            gameProfile = PROFILE_CACHE.get(args.get(0)).orElse(null);
         } catch (Throwable e) {
             if (showErrors) {
                 plugin.getLogger().log(Level.WARNING, "Error while trying to update skull profile", e);
