@@ -15,6 +15,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Level;
@@ -22,7 +23,7 @@ import java.util.logging.Level;
 public class BlockUpdateTask implements Loadable {
     private final VarBlocks plugin;
     private final Queue<BlockEntry> updateQueue = new LinkedList<>();
-    private final Map<Location, Map<Class<?>, Consumer<Block>>> setBlockMap = new HashMap<>();
+    private final Queue<Map.Entry<Location, Consumer<Block>>> setBlockQueue = new ConcurrentLinkedQueue<>();
     private final AtomicInteger pendingBlockSets = new AtomicInteger(0);
     private Task task;
 
@@ -44,16 +45,22 @@ public class BlockUpdateTask implements Loadable {
 
                 Consumer<Block> consumer = updater.getUpdateTask(args);
                 if (consumer != null) {
-                    setBlockMap.computeIfAbsent(location, k -> new HashMap<>()).put(consumer.getClass(), consumer);
+                    setBlockQueue.add(new AbstractMap.SimpleEntry<>(location, consumer));
                 }
             }
         }
 
         if (pendingBlockSets.get() > 0) return;
-        if (setBlockMap.isEmpty()) return;
 
-        for (Map.Entry<Location, Map<Class<?>, Consumer<Block>>> blockEntry : setBlockMap.entrySet()) {
-            Location location = blockEntry.getKey();
+        Map<Location, Map<Class<?>, Consumer<Block>>> setBlockMap = new HashMap<>();
+        Map.Entry<Location, Consumer<Block>> blockEntry;
+        while ((blockEntry = setBlockQueue.poll()) != null) {
+            Consumer<Block> consumer = blockEntry.getValue();
+            setBlockMap.computeIfAbsent(blockEntry.getKey(), k -> new HashMap<>()).put(consumer.getClass(), consumer);
+        }
+
+        for (Map.Entry<Location, Map<Class<?>, Consumer<Block>>> mapEntry : setBlockMap.entrySet()) {
+            Location location = mapEntry.getKey();
             World world = location.getWorld();
             if (world == null) continue;
             int chunkX = location.getBlockX() >> 4;
@@ -61,7 +68,7 @@ public class BlockUpdateTask implements Loadable {
             if (!world.isChunkLoaded(chunkX, chunkZ)) continue;
 
             pendingBlockSets.incrementAndGet();
-            Collection<Consumer<Block>> consumers = blockEntry.getValue().values();
+            List<Consumer<Block>> consumers = new ArrayList<>(mapEntry.getValue().values());
             LocationScheduler.get(plugin, location).run(() -> {
                 try {
                     Block block = location.getBlock();
@@ -73,7 +80,6 @@ public class BlockUpdateTask implements Loadable {
                 }
             });
         }
-        setBlockMap.clear();
     }
 
     @Override
@@ -89,4 +95,3 @@ public class BlockUpdateTask implements Loadable {
         }
     }
 }
-
