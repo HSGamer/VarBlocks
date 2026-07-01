@@ -4,11 +4,9 @@ import io.github.projectunified.minelib.plugin.base.BasePlugin;
 import io.github.projectunified.minelib.plugin.command.CommandComponent;
 import me.hsgamer.hscore.bukkit.utils.MessageUtils;
 import me.hsgamer.varblocks.command.MainCommand;
-import me.hsgamer.varblocks.hook.PlaceholderAPIHook;
 import me.hsgamer.varblocks.listener.BlockListener;
 import me.hsgamer.varblocks.manager.BlockManager;
 import me.hsgamer.varblocks.manager.BlockUpdaterManager;
-import me.hsgamer.varblocks.manager.StringManager;
 import me.hsgamer.varblocks.manager.TemplateManager;
 import me.hsgamer.varblocks.task.BlockUpdateTask;
 
@@ -22,15 +20,12 @@ public final class VarBlocks extends BasePlugin {
                 new TemplateManager(this),
                 new BlockUpdaterManager(),
                 new BlockManager(this),
-                new StringManager(),
 
                 new BlockUpdateTask(this),
 
                 new Permissions(this),
                 new CommandComponent(this, new MainCommand(this)),
-                new BlockListener(this),
-
-                new PlaceholderAPIHook(this)
+                new BlockListener(this)
         );
     }
 
